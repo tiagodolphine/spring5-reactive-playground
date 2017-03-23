@@ -1,0 +1,15 @@
+/target/
+/log/
+/logs/
+/shell/
+.classpath
+.project
+.settings
+.idea
+/logs
+*~
+*.iml
+*.log
+.mvn
+mvn*
+

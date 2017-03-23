@@ -1,0 +1,11 @@
+redis:
+    image: redis
+    ports:
+        - "6379:6379"
+mock1:
+    build: ./mock
+
+    links:
+        - redis
+    ports:
+        - "9000:9000"

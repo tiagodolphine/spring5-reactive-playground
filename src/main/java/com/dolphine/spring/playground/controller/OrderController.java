@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.time.Duration;
+import java.util.Date;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * Created by Tiago Dolphine (tiago.dolphine@ifood.com.br) on 18/03/17.
@@ -41,4 +47,17 @@ public class OrderController {
         Mono<Void> response = orderService.save(orderMono);
         return response;
     }
+
+    @GetMapping(path = "/stream", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    public Flux<Order> stream() {
+        Flux<Order>
+                orderFlux =
+                Flux.fromStream(Stream.generate(() -> Order.builder()
+                        .id(UUID.randomUUID().toString())
+                        .timestamp(new Date())
+                        .build()));
+
+       return Flux.zip(orderFlux, Flux.interval(Duration.ofSeconds(1))).map(Tuple2::getT1);
+    }
+
 }

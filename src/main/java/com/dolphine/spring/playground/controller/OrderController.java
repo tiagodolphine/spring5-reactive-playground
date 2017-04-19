@@ -42,10 +42,9 @@ public class OrderController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
                  produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Void> post(Mono<Order> orderMono) {
+    public Mono<Order> post(Mono<Order> orderMono) {
         logger.info("Post");
-        Mono<Void> response = orderService.save(orderMono);
-        return response;
+        return  orderService.save(orderMono);
     }
 
     @GetMapping(path = "/stream", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)

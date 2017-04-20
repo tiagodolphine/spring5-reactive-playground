@@ -3,6 +3,7 @@ package com.dolphine.spring.playground.controller;
 import com.dolphine.spring.playground.model.Customer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,9 +21,10 @@ public class CustomerController {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Customer> get(@PathVariable String id) {
         logger.info("Get Customer {}", id);
+        //just a mock for testing
         return Mono.just(Customer.builder()
                 .id(id)
                 .name("Tiago Dolphine")

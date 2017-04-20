@@ -5,8 +5,11 @@ import com.dolphine.spring.playground.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -42,13 +45,14 @@ public class OrderController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
                  produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Order> post(Mono<Order> orderMono) {
+    public Mono<Order> post(@RequestBody Mono<Order> orderMono) {
         logger.info("Post");
-        return  orderService.save(orderMono);
+        return orderMono.flatMap(order -> orderService.save(order));
     }
 
     @GetMapping(path = "/stream", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
     public Flux<Order> stream() {
+        logger.info("Stream");
         Flux<Order>
                 orderFlux =
                 Flux.fromStream(Stream.generate(() -> Order.builder()
@@ -59,4 +63,8 @@ public class OrderController {
        return Flux.zip(orderFlux, Flux.interval(Duration.ofSeconds(1))).map(Tuple2::getT1);
     }
 
+    @ExceptionHandler
+    public Mono<ResponseEntity> error(Throwable ex){
+        return Mono.just(ResponseEntity.badRequest().body(ex.getMessage()));
+    }
 }

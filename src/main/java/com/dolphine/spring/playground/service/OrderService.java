@@ -6,7 +6,6 @@ import com.dolphine.spring.playground.model.Order;
 import com.dolphine.spring.playground.repository.OrderRepository;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,24 +33,27 @@ public class OrderService implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         //Inserting test data !!!
         orderRepository.deleteAll()
-                .then(save(Mono.just(Order.builder()
+                .then(save(Order.builder()
                         .id(UUID.randomUUID().toString())
                         .customer(Customer.builder().id(UUID.randomUUID().toString()).build())
                         .items(Arrays.asList("Hamburguer"))
                         .value(new BigDecimal(100))
                         .timestamp(new Date())
-                        .build())))
+                        .build()))
                 .subscribe();
     }
 
     public Flux<Order> list() {
         return orderRepository.findAll()
-                .doOnNext(order -> customerClient.get(order.getCustomer().getId())
-                        .subscribe(customer -> order.setCustomer(customer)));
+                .flatMap(order -> customerClient.get(order.getCustomer().getId())
+                        .flatMap(customer -> {
+                            order.setCustomer(customer);
+                            return Mono.just(order);
+                        })
+                );
     }
 
-    @Transactional
-    public Mono<Order> save(Mono<Order> orderMono) {
-        return orderMono.flatMap(order -> orderRepository.save(order));
+    public Mono<Order> save(Order order) {
+        return orderRepository.save(order).log();
     }
 }

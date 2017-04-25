@@ -1,6 +1,6 @@
 package com.dolphine.spring.playground.controller;
 
-import org.junit.Assert;
+import com.dolphine.spring.playground.model.Customer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +24,6 @@ public class SlowControllerTest {
 
     @Test
     public void get() throws Exception {
-        webTestClient.get()
-                .uri("/slow")
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody()
-                .consumeAsStringWith(s -> Assert.assertEquals(s, "I'm a slow response!"));
+        webTestClient.get().uri("/slow/123").exchange().expectStatus().isOk().expectBody(Customer.class);
     }
 }

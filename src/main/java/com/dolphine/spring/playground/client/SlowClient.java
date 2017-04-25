@@ -22,18 +22,16 @@ public class SlowClient {
         Mono<String>
                 promise =
                 webClient.get()
-                        .uri("http://localhost:7337/slow")
+                        .uri("http://localhost:7337/slow/123")
                         .exchange()
                         .flatMap(response -> response.bodyToMono(String.class));
 
         logger.info("MONO returned at {}", LocalDateTime.now());
 
-        promise.subscribe(r -> {
-            logger.info("RESPONSE returned at {}", LocalDateTime.now());
-            countDownLatch.countDown();
-        });
+        promise.subscribe(r -> logger.info("RESPONSE {} returned at {}", r, LocalDateTime.now()),
+                ex -> logger.error("Error", ex),
+                () -> countDownLatch.countDown());
 
         countDownLatch.await();
-
     }
 }
